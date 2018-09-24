@@ -27,3 +27,9 @@ export interface StoredAnnotationRequestMap {
 export type AnnotationSender = (
     { annotation, tabId }: { annotation: Annotation; tabId: number },
 ) => void
+
+export interface SearchParams {
+    terms: string[]
+    startDate: Date | number
+    endDate: Date | number
+}

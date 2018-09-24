@@ -10,7 +10,7 @@ import { AnnotationRequests } from './request'
 import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
 import { StorageManager } from '../../search/types'
-import { AnnotationSender } from '../types'
+import { AnnotationSender, SearchParams } from '../types'
 
 export default class DirectLinkingBackground {
     private backend: DirectLinkingBackend
@@ -40,6 +40,7 @@ export default class DirectLinkingBackground {
                 createAnnotation: this.createAnnotation.bind(this),
                 editAnnotation: this.editAnnotation.bind(this),
                 deleteAnnotation: this.deleteAnnotation.bind(this),
+                searchAnnotations: this.searchAnnotations.bind(this),
                 toggleSidebar: this.toggleSidebar.bind(this),
                 getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
                 addAnnotationTag: this.addTagForAnnotation.bind(this),
@@ -129,6 +130,10 @@ export default class DirectLinkingBackground {
         })
 
         return uniqueUrl
+    }
+
+    async searchAnnotations({ tab }, params: SearchParams) {
+        return this.annotationStorage.search(params)
     }
 
     async editAnnotation({ tab }, pk, comment) {
