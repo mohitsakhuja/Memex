@@ -6,10 +6,11 @@ import {
 } from '../../util/webextensionRPC'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
-import { AnnotationRequests, AnnotationSender } from './request'
+import { AnnotationRequests } from './request'
 import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
 import { StorageManager } from '../../search/types'
+import { AnnotationSender } from '../types'
 
 export default class DirectLinkingBackground {
     private backend: DirectLinkingBackend
@@ -116,7 +117,7 @@ export default class DirectLinkingBackground {
     async createAnnotation({ tab }, { url, title, comment, body, selector }) {
         const pageUrl = url === null ? tab.url : url
         const pageTitle = title === null ? tab.title : title
-        const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
+        const uniqueUrl = `${pageUrl}/#${Date.now()}`
 
         await this.annotationStorage.createAnnotation({
             url: uniqueUrl,

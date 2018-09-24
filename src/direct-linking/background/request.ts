@@ -1,27 +1,11 @@
+import {
+    AnnotationSender,
+    StoredAnnotationRequestMap,
+    AnnotationRequest,
+} from '../types'
 import DirectLinkingBackend from './backend'
 
-export type Annotation = any
-
 // This thing sends the annotation back to the tab once it's loaded
-export type AnnotationSender = (
-    { annotation, tabId }: { annotation: Annotation; tabId: number },
-) => void
-
-export interface AnnotationRequest {
-    memexLinkOrigin: string
-    // urlWithoutProtocol: string
-    annotationId: string
-    tabId: string
-}
-
-interface StoredAnnotationRequest extends AnnotationRequest {
-    annotationPromise: Promise<Annotation>
-}
-
-interface StoredAnnotationRequestMap {
-    [tabId: string]: StoredAnnotationRequest
-}
-
 export class AnnotationRequests {
     private requests: StoredAnnotationRequestMap = {}
     private preventAutomaticAnchoring = null
