@@ -1,12 +1,24 @@
-import { makeRemotelyCallable, remoteFunction } from 'src/util/webextensionRPC'
+import { browser } from 'webextension-polyfill-ts'
+
+import {
+    makeRemotelyCallable,
+    remoteFunction,
+} from '../../util/webextensionRPC'
 import DirectLinkingBackend from './backend'
 import { setupRequestInterceptor } from './redirect'
-import { AnnotationRequests } from './request'
+import { AnnotationRequests, AnnotationSender } from './request'
 import DirectLinkingStorage, { AnnotationStorage } from './storage'
 import normalize from '../../util/encode-url-for-id'
+import { StorageManager } from '../../search/types'
 
 export default class DirectLinkingBackground {
-    constructor({ storageManager }) {
+    private backend: DirectLinkingBackend
+    private sendAnnotation: AnnotationSender
+    private requests: AnnotationRequests
+    directLinkingStorage: DirectLinkingStorage
+    annotationStorage: AnnotationStorage
+
+    constructor({ storageManager }: { storageManager: StorageManager }) {
         this.backend = new DirectLinkingBackend()
         this.directLinkingStorage = new DirectLinkingStorage({ storageManager })
         this.annotationStorage = new AnnotationStorage({ storageManager })
@@ -22,39 +34,21 @@ export default class DirectLinkingBackground {
     setupRemoteFunctions() {
         makeRemotelyCallable(
             {
-                followAnnotationRequest: (...params) => {
-                    this.followAnnotationRequest(...params)
-                },
-                createDirectLink: (...params) => {
-                    return this.createDirectLink(...params)
-                },
-                getAllAnnotations: (...params) => {
-                    return this.getAllAnnotationsByUrl(...params)
-                },
-                createAnnotation: (...params) => {
-                    return this.createAnnotation(...params)
-                },
-                editAnnotation: (...params) => {
-                    return this.editAnnotation(...params)
-                },
-                deleteAnnotation: (...params) => {
-                    return this.deleteAnnotation(...params)
-                },
-                openSidebarWithHighlight: (...params) => {
-                    return this.openSidebarWithHighlight(...params)
-                },
-                toggleSidebar: () => {
-                    return this.toggleSidebar()
-                },
-                getAnnotationTags: (...params) => {
-                    return this.getTagsByAnnotationUrl(...params)
-                },
-                addAnnotationTag: (...params) => {
-                    return this.addTagForAnnotation(...params)
-                },
-                delAnnotationTag: (...params) => {
-                    return this.delTagForAnnotation(...params)
-                },
+                createDirectLink: this.createDirectLink.bind(this),
+                getAllAnnotations: this.getAllAnnotationsByUrl.bind(this),
+                createAnnotation: this.createAnnotation.bind(this),
+                editAnnotation: this.editAnnotation.bind(this),
+                deleteAnnotation: this.deleteAnnotation.bind(this),
+                toggleSidebar: this.toggleSidebar.bind(this),
+                getAnnotationTags: this.getTagsByAnnotationUrl.bind(this),
+                addAnnotationTag: this.addTagForAnnotation.bind(this),
+                delAnnotationTag: this.delTagForAnnotation.bind(this),
+                followAnnotationRequest: this.followAnnotationRequest.bind(
+                    this,
+                ),
+                openSidebarWithHighlight: this.openSidebarWithHighlight.bind(
+                    this,
+                ),
             },
             { insertExtraArg: true },
         )
@@ -125,12 +119,12 @@ export default class DirectLinkingBackground {
         const uniqueUrl = `${pageUrl}/#${new Date().getTime()}`
 
         await this.annotationStorage.createAnnotation({
-            pageUrl,
             url: uniqueUrl,
             pageTitle,
+            selector,
+            pageUrl,
             comment,
             body,
-            selector,
         })
 
         return uniqueUrl
