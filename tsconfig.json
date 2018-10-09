@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "allowJs": true,
         "target": "ESNext",
         "module": "ES2015",
@@ -14,6 +15,12 @@
         "skipLibCheck": true,
         "strictNullChecks": false,
         "outDir": "tmp",
+        "paths": {
+            "storex": ["external/storex"],
+            "storex/*": ["external/storex/lib/*"],
+            "storex-backend-dexie": ["external/storex-backend-dexie"],
+            "memex-stemmer": ["external/memex-stemmer"]
+        },
         "lib": ["es2017", "dom", "esnext.asynciterable"]
     },
     "include": ["./src/**/*"],
