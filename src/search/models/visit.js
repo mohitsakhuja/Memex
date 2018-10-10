@@ -1,4 +1,4 @@
-import db from '..'
+import getDb from '..'
 import EventModel from './event-model'
 
 export default class Visit extends EventModel {
@@ -37,7 +37,8 @@ export default class Visit extends EventModel {
         this.scrollMaxPerc = props.scrollMaxPerc
     }
 
-    save() {
+    async save() {
+        const db = await getDb
         return db.visits.put(this)
     }
 }
