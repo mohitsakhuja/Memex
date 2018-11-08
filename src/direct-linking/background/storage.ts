@@ -228,25 +228,29 @@ export class AnnotationStorage extends FeatureStorage {
      * I originally intended a simpler single query like:
      *  { $or: [_body_terms: term, _comment_terms: term] }
      */
-    private async termSearch(term: string) {
-        const bodyRes = await this.storageManager
-            .collection(this._annotationsColl)
-            .findObjects<Annotation>({ _body_terms: { $all: [term] } })
+    private termSearch = ({
+        endDate = Date.now(),
+        startDate = 0,
+    }: Partial<SearchParams>) => async (term: string) => {
+        const termSearchField = (field: string) =>
+            this.storageManager
+                .collection(this._annotationsColl)
+                .findObjects<Annotation>({
+                    [field]: { $all: [term] },
+                    createdWhen: {
+                        $lte: endDate,
+                        $gte: startDate,
+                    },
+                })
 
-        const commentsRes = await this.storageManager
-            .collection(this._annotationsColl)
-            .findObjects<Annotation>({ _comment_terms: { $all: [term] } })
-
+        const bodyRes = await termSearchField('_body_terms')
+        const commentsRes = await termSearchField('_comment_terms')
         return this._uniqAnnots([...bodyRes, ...commentsRes])
     }
 
-    async search({
-        endDate = Date.now(),
-        startDate = 0,
-        terms = [],
-    }: SearchParams) {
+    async search({ terms = [], ...searchParams }: SearchParams) {
         const termResults = await Promise.all(
-            terms.map(term => this.termSearch(term)),
+            terms.map(this.termSearch(searchParams)),
         )
 
         // Flatten out results
