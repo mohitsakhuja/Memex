@@ -2,10 +2,10 @@ import React from 'react'
 // import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
-import {
-    redirectToGDriveLogin,
-    redirectToAutomaticBackupPurchase,
-} from './utils'
+// import {
+//     redirectToGDriveLogin,
+//     redirectToAutomaticBackupPurchase,
+// } from './utils'
 import { default as Overview } from './screens/overview'
 import { default as RunningBackup } from './screens/running-backup'
 import { default as OnboardingWhere } from './screens/onboarding-1-where'
@@ -65,13 +65,21 @@ export default class BackupSettingsContainer extends React.Component {
     state = { screen: null, isAuthenticated: null }
 
     async componentDidMount() {
-        this.setState(
-            await logic.getInitialState({
-                analytics,
-                localStorage,
-                remoteFunction,
-            }),
-        )
+        console.log('Prev state: ', this.state)
+        const state = await logic.getInitialState({
+            analytics,
+            localStorage,
+            remoteFunction,
+        })
+        console.log('State after mounting: ', state)
+        this.setState(state)
+        // this.setState(
+        //     await logic.getInitialState({
+        //         analytics,
+        //         localStorage,
+        //         remoteFunction,
+        //     }),
+        // )
     }
 
     renderScreen() {
@@ -103,6 +111,8 @@ export default class BackupSettingsContainer extends React.Component {
             onRedirect: logic.doRedirect,
         })
 
+        console.log('StateProps: ', stateProps)
+        console.log('Handlers: ', handlers)
         return React.createElement(screenConfig.component, {
             ...stateProps,
             ...handlers,

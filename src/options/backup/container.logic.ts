@@ -64,6 +64,7 @@ export async function getStartScreen({
             localStorage.removeItem('backup.onboarding.payment')
             localStorage.removeItem('backup.onboarding.authenticating')
             localStorage.removeItem('backup.onboarding')
+            console.log('coming through get start screen')
             return 'running-backup'
         } else {
             return 'onboarding-where'
@@ -88,6 +89,7 @@ export async function processEvent({
                     remoteFunction('getBackupInfo')(),
                 ])
                 const needsOnBoarding = !hasInitialBackup && !backupInfo
+                console.log('Needs on boarding: ', needsOnBoarding)
                 if (needsOnBoarding) {
                     localStorage.setItem('backup.onboarding', true)
                     analytics.trackEvent(
@@ -100,7 +102,9 @@ export async function processEvent({
                     return { screen: 'onboarding-where' }
                 }
 
+                console.log('Is authenticated: ', state.isAuthenticated)
                 if (state.isAuthenticated) {
+                    console.log('coming through overview')
                     return { screen: 'running-backup' }
                 } else {
                     return { redirect: { to: 'gdrive-login' } }
@@ -191,6 +195,7 @@ export async function processEvent({
                     },
                     true,
                 )
+                console.log('coming through onboarding size')
                 return { screen: 'running-backup' }
             },
         },
